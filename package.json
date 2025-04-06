@@ -1,6 +1,6 @@
 {
   "name": "json-schema-lite",
-  "version": "0.0.0-dev",
+  "version": "0.0.0-ShashGreninja",
   "private": true,
   "description": "A minimal JSON Schema implementation",
   "author": "Jason Desrosiers <jdesrosi@gmail.com>",
