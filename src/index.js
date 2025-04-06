@@ -51,7 +51,7 @@ const validateSchema = (schemaNode, instanceNode) => {
   if (schemaNode.type === "json") {
     switch (schemaNode.jsonType) {
       case "boolean":
-        return new Output(schemaNode.value, schemaNode, instanceNode);
+        return new Output(schemaNode.value, schemaNode, instanceNode, "validateSchema");
       case "object":
         let isValid = true;
         for (const propertyNode of schemaNode.children) {
@@ -65,7 +65,7 @@ const validateSchema = (schemaNode, instanceNode) => {
           }
         }
 
-        return new Output(isValid, schemaNode, instanceNode);
+        return new Output(isValid, schemaNode, instanceNode, "isValid");
     }
   }
 
@@ -107,12 +107,12 @@ keywordHandlers.set("$ref", (refNode, instanceNode) => {
   const referencedSchemaNode = jsonPointerGet(pointer, schemaNode, uri);
 
   const keywordOutput = validateSchema(referencedSchemaNode, instanceNode);
-  return new Output(keywordOutput.valid, refNode, instanceNode, keywordOutput.errors);
+  return new Output(keywordOutput.valid, refNode, instanceNode, "refNode" ,keywordOutput.errors);
 });
 
 keywordHandlers.set("additionalProperties", (additionalPropertiesNode, instanceNode, schemaNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, additionalPropertiesNode, instanceNode);
+    return new Output(true, additionalPropertiesNode, instanceNode, "additionalPropertiesNode");
   }
 
   const propertyPatterns = [];
@@ -146,7 +146,7 @@ keywordHandlers.set("additionalProperties", (additionalPropertiesNode, instanceN
     }
   }
 
-  return new Output(isValid, additionalPropertiesNode, instanceNode);
+  return new Output(isValid, additionalPropertiesNode, instanceNode, "additionalPropertiesNode");
 });
 
 /** @type (string: string) => string */
@@ -164,7 +164,7 @@ keywordHandlers.set("allOf", (allOfNode, instanceNode) => {
     }
   }
 
-  return new Output(isValid, allOfNode, instanceNode);
+  return new Output(isValid, allOfNode, instanceNode, "allOfNode");
 });
 
 keywordHandlers.set("anyOf", (anyOfNode, instanceNode) => {
@@ -177,7 +177,7 @@ keywordHandlers.set("anyOf", (anyOfNode, instanceNode) => {
       isValid = true;
     }
   }
-  return new Output(isValid, anyOfNode, instanceNode);
+  return new Output(isValid, anyOfNode, instanceNode, "anyOfNode");
 });
 
 keywordHandlers.set("oneOf", (oneOfNode, instanceNode) => {
@@ -191,17 +191,17 @@ keywordHandlers.set("oneOf", (oneOfNode, instanceNode) => {
     }
   }
 
-  return new Output(matches === 1, oneOfNode, instanceNode);
+  return new Output(matches === 1, oneOfNode, instanceNode, "oneOfNode");
 });
 
 keywordHandlers.set("not", (notNode, instanceNode) => {
   const schemaOutput = validateSchema(notNode, instanceNode);
-  return new Output(!schemaOutput.valid, notNode, instanceNode);
+  return new Output(!schemaOutput.valid, notNode, instanceNode, "notNode");
 });
 
 keywordHandlers.set("contains", (containsNode, instanceNode, schemaNode) => {
   if (instanceNode.jsonType !== "array") {
-    return new Output(true, containsNode, instanceNode);
+    return new Output(true, containsNode, instanceNode, "containsNode");
   }
 
   let minContains = 1;
@@ -229,12 +229,12 @@ keywordHandlers.set("contains", (containsNode, instanceNode, schemaNode) => {
   }
 
   const isValid = matches >= minContains && matches <= maxContains;
-  return new Output(isValid, containsNode, instanceNode);
+  return new Output(isValid, containsNode, instanceNode, "containsNode");
 });
 
 keywordHandlers.set("dependentSchemas", (dependentSchemasNode, instanceNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, dependentSchemasNode, instanceNode);
+    return new Output(true, dependentSchemasNode, instanceNode, "dependentSchemasNode");
   }
 
   assertNodeType(dependentSchemasNode, "object");
@@ -250,7 +250,7 @@ keywordHandlers.set("dependentSchemas", (dependentSchemasNode, instanceNode) => 
     }
   }
 
-  return new Output(isValid, dependentSchemasNode, instanceNode);
+  return new Output(isValid, dependentSchemasNode, instanceNode, "dependentSchemasNode");
 });
 
 keywordHandlers.set("then", (thenNode, instanceNode, schemaNode) => {
@@ -262,7 +262,7 @@ keywordHandlers.set("then", (thenNode, instanceNode, schemaNode) => {
     }
   }
 
-  return new Output(true, thenNode, instanceNode);
+  return new Output(true, thenNode, instanceNode, "thenNode");
 });
 
 keywordHandlers.set("else", (elseNode, instanceNode, schemaNode) => {
@@ -274,12 +274,12 @@ keywordHandlers.set("else", (elseNode, instanceNode, schemaNode) => {
     }
   }
 
-  return new Output(true, elseNode, instanceNode);
+  return new Output(true, elseNode, instanceNode, "elseNode");
 });
 
 keywordHandlers.set("items", (itemsNode, instanceNode, schemaNode) => {
   if (instanceNode.jsonType !== "array") {
-    return new Output(true, itemsNode, instanceNode);
+    return new Output(true, itemsNode, instanceNode, "itemsNode");
   }
 
   let numberOfPrefixItems = 0;
@@ -298,12 +298,12 @@ keywordHandlers.set("items", (itemsNode, instanceNode, schemaNode) => {
     }
   }
 
-  return new Output(isValid, itemsNode, instanceNode);
+  return new Output(isValid, itemsNode, instanceNode, "itemsNode");
 });
 
 keywordHandlers.set("patternProperties", (patternPropertiesNode, instanceNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, patternPropertiesNode, instanceNode);
+    return new Output(true, patternPropertiesNode, instanceNode, "patternPropertiesNode");
   }
 
   assertNodeType(patternPropertiesNode, "object");
@@ -324,12 +324,12 @@ keywordHandlers.set("patternProperties", (patternPropertiesNode, instanceNode) =
     }
   }
 
-  return new Output(isValid, patternPropertiesNode, instanceNode);
+  return new Output(isValid, patternPropertiesNode, instanceNode, "patternPropertiesNode");
 });
 
 keywordHandlers.set("prefixItems", (prefixItemsNode, instanceNode) => {
   if (instanceNode.jsonType !== "array") {
-    return new Output(true, prefixItemsNode, instanceNode);
+    return new Output(true, prefixItemsNode, instanceNode, "prefixItemsNode");
   }
 
   assertNodeType(prefixItemsNode, "array");
@@ -344,12 +344,12 @@ keywordHandlers.set("prefixItems", (prefixItemsNode, instanceNode) => {
     }
   }
 
-  return new Output(isValid, prefixItemsNode, instanceNode);
+  return new Output(isValid, prefixItemsNode, instanceNode, "prefixItemsNode");
 });
 
 keywordHandlers.set("properties", (propertiesNode, instanceNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, propertiesNode, instanceNode);
+    return new Output(true, propertiesNode, instanceNode, "propertiesNode");
   }
 
   assertNodeType(propertiesNode, "object");
@@ -366,12 +366,12 @@ keywordHandlers.set("properties", (propertiesNode, instanceNode) => {
     }
   }
 
-  return new Output(isValid, propertiesNode, instanceNode);
+  return new Output(isValid, propertiesNode, instanceNode, "propertiesNode");
 });
 
 keywordHandlers.set("propertyNames", (propertyNamesNode, instanceNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, propertyNamesNode, instanceNode);
+    return new Output(true, propertyNamesNode, instanceNode, "propertyNamesNode");
   }
 
   let isValid = true;
@@ -389,17 +389,17 @@ keywordHandlers.set("propertyNames", (propertyNamesNode, instanceNode) => {
     }
   }
 
-  return new Output(isValid, propertyNamesNode, instanceNode);
+  return new Output(isValid, propertyNamesNode, instanceNode, "propertyNamesNode");
 });
 
 keywordHandlers.set("const", (constNode, instanceNode) => {
   const isValid = jsonStringify(jsonValue(instanceNode)) === jsonStringify(jsonValue(constNode));
-  return new Output(isValid, constNode, instanceNode);
+  return new Output(isValid, constNode, instanceNode, "constNode");
 });
 
 keywordHandlers.set("dependentRequired", (dependentRequiredNode, instanceNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, dependentRequiredNode, instanceNode);
+    return new Output(true, dependentRequiredNode, instanceNode, "dependentRequiredNode");
   }
 
   assertNodeType(dependentRequiredNode, "object");
@@ -420,7 +420,7 @@ keywordHandlers.set("dependentRequired", (dependentRequiredNode, instanceNode) =
     }
   }
 
-  return new Output(isValid, dependentRequiredNode, instanceNode);
+  return new Output(isValid, dependentRequiredNode, instanceNode,  "dependentRequiredNode");
 });
 
 keywordHandlers.set("enum", (enumNode, instanceNode) => {
@@ -429,132 +429,132 @@ keywordHandlers.set("enum", (enumNode, instanceNode) => {
   const instanceValue = jsonStringify(jsonValue(instanceNode));
   for (const enumItemNode of enumNode.children) {
     if (jsonStringify(jsonValue(enumItemNode)) === instanceValue) {
-      return new Output(true, enumNode, instanceNode);
+      return new Output(true, enumNode, instanceNode, "enumNode");
     }
   }
-  return new Output(false, enumNode, instanceNode);
+  return new Output(false, enumNode, instanceNode, "enumNode");
 });
 
 keywordHandlers.set("exclusiveMaximum", (exclusiveMaximumNode, instanceNode) => {
   if (instanceNode.jsonType !== "number") {
-    return new Output(true, exclusiveMaximumNode, instanceNode);
+    return new Output(true, exclusiveMaximumNode, instanceNode, "exclusiveMaximumNode");
   }
 
   assertNodeType(exclusiveMaximumNode, "number");
 
   const isValid = instanceNode.value < exclusiveMaximumNode.value;
-  return new Output(isValid, exclusiveMaximumNode, instanceNode);
+  return new Output(isValid, exclusiveMaximumNode, instanceNode, "exclusiveMaximumNode");
 });
 
 keywordHandlers.set("exclusiveMinimum", (exclusiveMinimumNode, instanceNode) => {
   if (instanceNode.jsonType !== "number") {
-    return new Output(true, exclusiveMinimumNode, instanceNode);
+    return new Output(true, exclusiveMinimumNode, instanceNode, "exclusiveMinimumNode");
   }
 
   assertNodeType(exclusiveMinimumNode, "number");
 
   const isValid = instanceNode.value > exclusiveMinimumNode.value;
-  return new Output(isValid, exclusiveMinimumNode, instanceNode);
+  return new Output(isValid, exclusiveMinimumNode, instanceNode, "exclusiveMinimumNode");
 });
 
 keywordHandlers.set("maxItems", (maxItemsNode, instanceNode) => {
   if (instanceNode.jsonType !== "array") {
-    return new Output(true, maxItemsNode, instanceNode);
+    return new Output(true, maxItemsNode, instanceNode, "maxItemsNode");
   }
 
   assertNodeType(maxItemsNode, "number");
 
   const isValid = instanceNode.children.length <= maxItemsNode.value;
-  return new Output(isValid, maxItemsNode, instanceNode);
+  return new Output(isValid, maxItemsNode, instanceNode, "maxItemsNode");
 });
 
 keywordHandlers.set("minItems", (minItemsNode, instanceNode) => {
   if (instanceNode.jsonType !== "array") {
-    return new Output(true, minItemsNode, instanceNode);
+    return new Output(true, minItemsNode, instanceNode, "minItemsNode");
   }
 
   assertNodeType(minItemsNode, "number");
 
   const isValid = instanceNode.children.length >= minItemsNode.value;
-  return new Output(isValid, minItemsNode, instanceNode);
+  return new Output(isValid, minItemsNode, instanceNode, "minItemsNode");
 });
 
 keywordHandlers.set("maxLength", (maxLengthNode, instanceNode) => {
   if (instanceNode.jsonType !== "string") {
-    return new Output(true, maxLengthNode, instanceNode);
+    return new Output(true, maxLengthNode, instanceNode, "maxLengthNode");
   }
 
   assertNodeType(maxLengthNode, "number");
 
   const isValid = [...instanceNode.value].length <= maxLengthNode.value;
-  return new Output(isValid, maxLengthNode, instanceNode);
+  return new Output(isValid, maxLengthNode, instanceNode, "maxLengthNode");
 });
 
 keywordHandlers.set("minLength", (minLengthNode, instanceNode) => {
   if (instanceNode.jsonType !== "string") {
-    return new Output(true, minLengthNode, instanceNode);
+    return new Output(true, minLengthNode, instanceNode, "minLengthNode");
   }
 
   assertNodeType(minLengthNode, "number");
 
   const isValid = [...instanceNode.value].length >= minLengthNode.value;
-  return new Output(isValid, minLengthNode, instanceNode);
+  return new Output(isValid, minLengthNode, instanceNode, "minLengthNode");
 });
 
 keywordHandlers.set("maxProperties", (maxPropertiesNode, instanceNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, maxPropertiesNode, instanceNode);
+    return new Output(true, maxPropertiesNode, instanceNode, "maxPropertiesNode");
   }
 
   assertNodeType(maxPropertiesNode, "number");
 
   const isValid = instanceNode.children.length <= maxPropertiesNode.value;
-  return new Output(isValid, maxPropertiesNode, instanceNode);
+  return new Output(isValid, maxPropertiesNode, instanceNode, "maxPropertiesNode");
 });
 
 keywordHandlers.set("minProperties", (minPropertiesNode, instanceNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, minPropertiesNode, instanceNode);
+    return new Output(true, minPropertiesNode, instanceNode, "minPropertiesNode");
   }
 
   assertNodeType(minPropertiesNode, "number");
 
   const isValid = instanceNode.children.length >= minPropertiesNode.value;
-  return new Output(isValid, minPropertiesNode, instanceNode);
+  return new Output(isValid, minPropertiesNode, instanceNode, "minPropertiesNode");
 });
 
 keywordHandlers.set("maximum", (maximumNode, instanceNode) => {
   if (instanceNode.jsonType !== "number") {
-    return new Output(true, maximumNode, instanceNode);
+    return new Output(true, maximumNode, instanceNode, "maximumNode");
   }
 
   assertNodeType(maximumNode, "number");
 
   const isValid = instanceNode.value <= maximumNode.value;
-  return new Output(isValid, maximumNode, instanceNode);
+  return new Output(isValid, maximumNode, instanceNode, "maximumNode");
 });
 
 keywordHandlers.set("minimum", (minimumNode, instanceNode) => {
   if (instanceNode.jsonType !== "number") {
-    return new Output(true, minimumNode, instanceNode);
+    return new Output(true, minimumNode, instanceNode, "minimumNode");
   }
 
   assertNodeType(minimumNode, "number");
 
   const isValid = instanceNode.value >= minimumNode.value;
-  return new Output(isValid, minimumNode, instanceNode);
+  return new Output(isValid, minimumNode, instanceNode, "minimumNode");
 });
 
 keywordHandlers.set("multipleOf", (multipleOfNode, instanceNode) => {
   if (instanceNode.jsonType !== "number") {
-    return new Output(true, multipleOfNode, instanceNode);
+    return new Output(true, multipleOfNode, instanceNode, "multipleOfNode");
   }
 
   assertNodeType(multipleOfNode, "number");
 
   const remainder = instanceNode.value % multipleOfNode.value;
   const isValid = numberEqual(0, remainder) || numberEqual(multipleOfNode.value, remainder);
-  return new Output(isValid, multipleOfNode, instanceNode);
+  return new Output(isValid, multipleOfNode, instanceNode, "multipleOfNode");
 });
 
 /** @type (a: number, b: number) => boolean */
@@ -562,34 +562,34 @@ const numberEqual = (a, b) => Math.abs(a - b) < 1.19209290e-7;
 
 keywordHandlers.set("pattern", (patternNode, instanceNode) => {
   if (instanceNode.jsonType !== "string") {
-    return new Output(true, patternNode, instanceNode);
+    return new Output(true, patternNode, instanceNode, "patternNode");
   }
 
   assertNodeType(patternNode, "string");
 
   const isValid = new RegExp(patternNode.value, "u").test(instanceNode.value);
-  return new Output(isValid, patternNode, instanceNode);
+  return new Output(isValid, patternNode, instanceNode, "patternNode");
 });
 
 keywordHandlers.set("required", (requiredNode, instanceNode) => {
   if (instanceNode.jsonType !== "object") {
-    return new Output(true, requiredNode, instanceNode);
+    return new Output(true, requiredNode, instanceNode, "requiredNode");
   }
 
   assertNodeType(requiredNode, "array");
   for (const requiredPropertyNode of requiredNode.children) {
     assertNodeType(requiredPropertyNode, "string");
     if (!jsonObjectHas(requiredPropertyNode.value, instanceNode)) {
-      return new Output(false, requiredNode, instanceNode);
+      return new Output(false, requiredNode, instanceNode, "requiredNode");
     }
   }
-  return new Output(true, requiredNode, instanceNode);
+  return new Output(true, requiredNode, instanceNode, "requiredNode");
 });
 
 keywordHandlers.set("type", (typeNode, instanceNode) => {
   if (typeNode.type === "json") {
     if (typeNode.jsonType === "string") {
-      return new Output(isTypeOf(instanceNode, typeNode.value), typeNode, instanceNode);
+      return new Output(isTypeOf(instanceNode, typeNode.value), typeNode, instanceNode, "typeNode");
     }
 
     if (typeNode.jsonType === "array") {
@@ -599,11 +599,11 @@ keywordHandlers.set("type", (typeNode, instanceNode) => {
         }
 
         if (isTypeOf(instanceNode, itemNode.value)) {
-          return new Output(true, typeNode, instanceNode);
+          return new Output(true, typeNode, instanceNode, "typeNode");
         }
       }
 
-      return new Output(false, typeNode, instanceNode);
+      return new Output(false, typeNode, instanceNode, "typeNode");
     }
   }
 
@@ -617,18 +617,18 @@ const isTypeOf = (instance, type) => type === "integer"
 
 keywordHandlers.set("uniqueItems", (uniqueItemsNode, instanceNode) => {
   if (instanceNode.jsonType !== "array") {
-    return new Output(true, uniqueItemsNode, instanceNode);
+    return new Output(true, uniqueItemsNode, instanceNode, "uniqueItemsNode");
   }
 
   assertNodeType(uniqueItemsNode, "boolean");
 
   if (uniqueItemsNode.value === false) {
-    return new Output(true, uniqueItemsNode, instanceNode);
+    return new Output(true, uniqueItemsNode, instanceNode, "uniqueItemsNode");
   }
 
   const normalizedItems = instanceNode.children.map((itemNode) => jsonStringify(jsonValue(itemNode)));
   const isValid = new Set(normalizedItems).size === normalizedItems.length;
-  return new Output(isValid, uniqueItemsNode, instanceNode);
+  return new Output(isValid, uniqueItemsNode, instanceNode, "uniqueItemsNode");
 });
 
 keywordHandlers.set("$id", (idNode, instanceNode, schemaNode) => {
@@ -636,7 +636,7 @@ keywordHandlers.set("$id", (idNode, instanceNode, schemaNode) => {
     throw Error(`Embedded schemas are not supported. Found at ${schemaNode.location}`);
   }
 
-  return new Output(true, idNode, instanceNode);
+  return new Output(true, idNode, instanceNode, "idNode");
 });
 
 keywordHandlers.set("$anchor", (anchorNode) => {
