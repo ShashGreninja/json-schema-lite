@@ -18,8 +18,8 @@ export class Output {
  */
   constructor(valid, keywordNode, instanceNode, keyword, errors) {
     this.valid = valid;
-    this.keywordLocation = keywordNode.location;    //location of the keyword relative to the schema node being evaluated
-    this.absoluteKeywordLocation = keywordNode.location;    //absolute location of the keyword in the schema
+    this.keywordLocation = keywordNode.location;// location of the keyword relative to the schema node being evaluated
+    this.absoluteKeywordLocation = keywordNode.location;// absolute location of the keyword in the schema
     this.instanceLocation = instanceNode.location;
     this.keyword = keyword;
     this.error = `current instance should pass "${keyword}" keyword validation`;

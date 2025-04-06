@@ -107,7 +107,7 @@ keywordHandlers.set("$ref", (refNode, instanceNode) => {
   const referencedSchemaNode = jsonPointerGet(pointer, schemaNode, uri);
 
   const keywordOutput = validateSchema(referencedSchemaNode, instanceNode);
-  return new Output(keywordOutput.valid, refNode, instanceNode, "refNode" ,keywordOutput.errors);
+  return new Output(keywordOutput.valid, refNode, instanceNode, "refNode", keywordOutput.errors);
 });
 
 keywordHandlers.set("additionalProperties", (additionalPropertiesNode, instanceNode, schemaNode) => {
@@ -420,7 +420,7 @@ keywordHandlers.set("dependentRequired", (dependentRequiredNode, instanceNode) =
     }
   }
 
-  return new Output(isValid, dependentRequiredNode, instanceNode,  "dependentRequiredNode");
+  return new Output(isValid, dependentRequiredNode, instanceNode, "dependentRequiredNode");
 });
 
 keywordHandlers.set("enum", (enumNode, instanceNode) => {
